@@ -11,27 +11,28 @@ env:
   RAYLIB_VERSION: 5.5.0-0
 
 jobs:
+  # ============================================
   # Linux x86_64 builds
+  # ============================================
   build-linux-x64-x11:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Build raylib (X11)
         run: |
-          sudo apt update
-          sudo apt install libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev
           cd raylib
-          mkdir build
-          cd build
-          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DUSE_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Release ..
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DUSE_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Release .. 
           make -j$(nproc)
           sudo make install
 
@@ -44,31 +45,30 @@ jobs:
           ./build-docs.sh
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: jar-linux-x64-x11
-          path: ./*.jar
+          path: . /*. jar
 
   build-linux-x64-wayland:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Build raylib (Wayland)
         run: |
-          sudo apt update
-          sudo apt install libasound2-dev mesa-common-dev libwayland-dev libxkbcommon-dev wayland-protocols libwayland-egl1-mesa libgl1-mesa-dev libglu1-mesa-dev
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev mesa-common-dev libwayland-dev libxkbcommon-dev wayland-protocols libwayland-egl1-mesa libgl1-mesa-dev libglu1-mesa-dev libegl1-mesa-dev
           cd raylib
-          mkdir build
-          cd build
-          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DUSE_WAYLAND=ON -DCMAKE_BUILD_TYPE=Release ..
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DUSE_WAYLAND=ON -DCMAKE_BUILD_TYPE=Release .. 
           make -j$(nproc)
           sudo make install
 
@@ -80,31 +80,30 @@ jobs:
           ./build-native.sh
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: jar-linux-x64-wayland
-          path: ./*.jar
+          path: . /*.jar
 
   build-linux-x64-drm:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Build raylib (DRM)
         run: |
-          sudo apt update
-          sudo apt install libasound2-dev mesa-common-dev libdrm-dev libgbm-dev libegl1-mesa-dev libgl1-mesa-dev
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev mesa-common-dev libdrm-dev libgbm-dev libegl1-mesa-dev libgl1-mesa-dev
           cd raylib
-          mkdir build
-          cd build
-          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DPLATFORM=DRM -DCMAKE_BUILD_TYPE=Release ..
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DPLATFORM=DRM -DCMAKE_BUILD_TYPE=Release .. 
           make -j$(nproc)
           sudo make install
 
@@ -116,190 +115,433 @@ jobs:
           ./build-native.sh
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: jar-linux-x64-drm
           path: ./*.jar
 
-  # Linux ARM64 builds
-  build-linux-arm64-x11:
-    runs-on: ubuntu-20.04
+  # ============================================
+  # Linux x86 (32-bit) builds
+  # ============================================
+  build-linux-x86-x11:
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Set up i386 cross-compilation
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib g++-multilib
+          sudo apt-get install -y libasound2-dev:i386 libx11-dev:i386 libxrandr-dev:i386 libxi-dev:i386 libgl1-mesa-dev:i386 libglu1-mesa-dev:i386
+
+      - name: Build raylib (x86, X11)
+        run: |
+          cd raylib
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DUSE_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32" ..
+          make -j$(nproc)
+          sudo make install
+
+      - name: Build jaylib
+        env:
+          RAYLIB_PLATFORM: linux-x86-x11
+          CFLAGS: -m32
+          CXXFLAGS: -m32
+        run: |
+          ./build-java.sh
+          ./build-native.sh
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-linux-x86-x11
+          path: . /*.jar
+
+  # ============================================
+  # Linux ARM64 builds
+  # ============================================
+  build-linux-arm64-x11:
+    runs-on: ubuntu-22. 04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Set up ARM64 cross-compilation
         run: |
-          sudo apt update
-          sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
           sudo dpkg --add-architecture arm64
-          sudo bash -c 'cat > /etc/apt/sources.list.d/arm64.list << EOF
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal main restricted
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates main restricted
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal universe
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates universe
+          sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources.list
+          sudo bash -c 'cat > /etc/apt/sources.list. d/arm64.list << EOF
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
           EOF'
-          sudo apt update
-          sudo apt install libasound2-dev:arm64 libx11-dev:arm64 libxrandr-dev:arm64 libxi-dev:arm64 libgl1-mesa-dev:arm64 libglu1-mesa-dev:arm64
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev:arm64 libx11-dev:arm64 libxrandr-dev:arm64 libxi-dev:arm64 libgl1-mesa-dev:arm64 libglu1-mesa-dev:arm64
 
       - name: Build raylib (ARM64, X11)
         run: |
           cd raylib
-          mkdir build
-          cd build
+          mkdir build && cd build
           cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DUSE_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ ..
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+            -DCMAKE_FIND_ROOT_PATH=/usr/aarch64-linux-gnu \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY .. 
           make -j$(nproc)
           sudo make install
 
       - name: Build jaylib
         env:
           RAYLIB_PLATFORM: linux-arm64-x11
+          CC: aarch64-linux-gnu-gcc
+          CXX: aarch64-linux-gnu-g++
         run: |
-          export CC=aarch64-linux-gnu-gcc
-          export CXX=aarch64-linux-gnu-g++
           ./build-java.sh
           ./build-native.sh
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: jar-linux-arm64-x11
           path: ./*.jar
 
   build-linux-arm64-wayland:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Set up ARM64 cross-compilation
         run: |
-          sudo apt update
-          sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
           sudo dpkg --add-architecture arm64
-          sudo bash -c 'cat > /etc/apt/sources.list.d/arm64.list << EOF
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal main restricted
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates main restricted
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal universe
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates universe
+          sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources.list
+          sudo bash -c 'cat > /etc/apt/sources. list.d/arm64.list << EOF
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
           EOF'
-          sudo apt update
-          sudo apt install libasound2-dev:arm64 libwayland-dev:arm64 libxkbcommon-dev:arm64 wayland-protocols libgl1-mesa-dev:arm64
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev:arm64 libwayland-dev:arm64 libxkbcommon-dev:arm64 wayland-protocols libgl1-mesa-dev:arm64 libegl1-mesa-dev:arm64
 
       - name: Build raylib (ARM64, Wayland)
         run: |
           cd raylib
-          mkdir build
-          cd build
+          mkdir build && cd build
           cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DUSE_WAYLAND=ON -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ ..
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+            -DCMAKE_FIND_ROOT_PATH=/usr/aarch64-linux-gnu \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY .. 
           make -j$(nproc)
           sudo make install
 
       - name: Build jaylib
         env:
           RAYLIB_PLATFORM: linux-arm64-wayland
+          CC: aarch64-linux-gnu-gcc
+          CXX: aarch64-linux-gnu-g++
         run: |
-          export CC=aarch64-linux-gnu-gcc
-          export CXX=aarch64-linux-gnu-g++
           ./build-java.sh
           ./build-native.sh
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: jar-linux-arm64-wayland
           path: ./*.jar
 
   build-linux-arm64-drm:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Set up ARM64 cross-compilation
         run: |
-          sudo apt update
-          sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
           sudo dpkg --add-architecture arm64
-          sudo bash -c 'cat > /etc/apt/sources.list.d/arm64.list << EOF
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal main restricted
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates main restricted
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal universe
-          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates universe
+          sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources. list
+          sudo bash -c 'cat > /etc/apt/sources.list. d/arm64. list << EOF
+          deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+          deb [arch=arm64] http://ports. ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+          deb [arch=arm64] http://ports. ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
           EOF'
-          sudo apt update
-          sudo apt install libasound2-dev:arm64 libdrm-dev:arm64 libgbm-dev:arm64 libegl1-mesa-dev:arm64 libgl1-mesa-dev:arm64
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev:arm64 libdrm-dev:arm64 libgbm-dev:arm64 libegl1-mesa-dev:arm64 libgl1-mesa-dev:arm64
 
       - name: Build raylib (ARM64, DRM)
         run: |
           cd raylib
-          mkdir build
-          cd build
+          mkdir build && cd build
           cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DPLATFORM=DRM -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ ..
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+            -DCMAKE_FIND_ROOT_PATH=/usr/aarch64-linux-gnu \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY ..
           make -j$(nproc)
           sudo make install
 
       - name: Build jaylib
         env:
           RAYLIB_PLATFORM: linux-arm64-drm
+          CC: aarch64-linux-gnu-gcc
+          CXX: aarch64-linux-gnu-g++
         run: |
-          export CC=aarch64-linux-gnu-gcc
-          export CXX=aarch64-linux-gnu-g++
           ./build-java.sh
           ./build-native.sh
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: jar-linux-arm64-drm
           path: ./*.jar
 
-  # macOS builds (Universal binary with x86_64 and ARM64)
-  build-mac-universal:
-    runs-on: macos-12
-    env:
-      MACOSX_DEPLOYMENT_TARGET: 10.14
-
+  # ============================================
+  # Linux ARM32 (armhf) builds - Raspberry Pi
+  # ============================================
+  build-linux-armhf-x11:
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Set up ARM32 (armhf) cross-compilation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          sudo dpkg --add-architecture armhf
+          sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources.list
+          sudo bash -c 'cat > /etc/apt/sources. list.d/armhf.list << EOF
+          deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+          deb [arch=armhf] http://ports. ubuntu.com/ubuntu-ports jammy-updates main restricted universe multiverse
+          deb [arch=armhf] http://ports. ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
+          EOF'
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev:armhf libx11-dev:armhf libxrandr-dev:armhf libxi-dev:armhf libgl1-mesa-dev:armhf libglu1-mesa-dev:armhf
+
+      - name: Build raylib (ARM32, X11)
+        run: |
+          cd raylib
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DUSE_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=arm \
+            -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc -DCMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+            -DCMAKE_FIND_ROOT_PATH=/usr/arm-linux-gnueabihf \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY .. 
+          make -j$(nproc)
+          sudo make install
+
+      - name: Build jaylib
+        env:
+          RAYLIB_PLATFORM: linux-armhf-x11
+          CC: arm-linux-gnueabihf-gcc
+          CXX: arm-linux-gnueabihf-g++
+        run: |
+          ./build-java.sh
+          ./build-native.sh
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-linux-armhf-x11
+          path: . /*.jar
+
+  build-linux-armhf-drm:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Set up ARM32 (armhf) cross-compilation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+          sudo dpkg --add-architecture armhf
+          sudo sed -i 's/^deb /deb [arch=amd64] /' /etc/apt/sources. list
+          sudo bash -c 'cat > /etc/apt/sources.list. d/armhf.list << EOF
+          deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports jammy main restricted universe multiverse
+          deb [arch=armhf] http://ports.ubuntu. com/ubuntu-ports jammy-updates main restricted universe multiverse
+          deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted universe multiverse
+          EOF'
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev:armhf libdrm-dev:armhf libgbm-dev:armhf libegl1-mesa-dev:armhf libgl1-mesa-dev:armhf
+
+      - name: Build raylib (ARM32, DRM - Raspberry Pi native)
+        run: |
+          cd raylib
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DPLATFORM=DRM -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=arm \
+            -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc -DCMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+            -DCMAKE_FIND_ROOT_PATH=/usr/arm-linux-gnueabihf \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+            -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+            -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY ..
+          make -j$(nproc)
+          sudo make install
+
+      - name: Build jaylib
+        env:
+          RAYLIB_PLATFORM: linux-armhf-drm
+          CC: arm-linux-gnueabihf-gcc
+          CXX: arm-linux-gnueabihf-g++
+        run: |
+          ./build-java. sh
+          ./build-native.sh
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-linux-armhf-drm
+          path: ./*.jar
+
+  # ============================================
+  # macOS builds
+  # ============================================
+  build-mac-x86_64:
+    runs-on: macos-13
+    env:
+      MACOSX_DEPLOYMENT_TARGET: '10.14'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Build raylib (x86_64)
+        run: |
+          cd raylib
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DCMAKE_BUILD_TYPE=Release .. 
+          make -j$(sysctl -n hw.ncpu)
+          sudo make install
+
+      - name: Build jaylib
+        env:
+          RAYLIB_PLATFORM: macosx-x86_64
+        run: |
+          ./build-java. sh
+          ./build-native.sh
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-macosx-x86_64
+          path: ./*.jar
+
+  build-mac-arm64:
+    runs-on: macos-14
+    env:
+      MACOSX_DEPLOYMENT_TARGET: '11.0'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Build raylib (ARM64)
+        run: |
+          cd raylib
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCMAKE_OSX_ARCHITECTURES="arm64" -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DCMAKE_BUILD_TYPE=Release ..
+          make -j$(sysctl -n hw.ncpu)
+          sudo make install
+
+      - name: Build jaylib
+        env:
+          RAYLIB_PLATFORM: macosx-arm64
+        run: |
+          ./build-java.sh
+          ./build-native.sh
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-macosx-arm64
+          path: . /*.jar
+
+  build-mac-universal:
+    runs-on: macos-14
+    env:
+      MACOSX_DEPLOYMENT_TARGET: '11. 0'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Build raylib (Universal)
         run: |
           cd raylib
-          mkdir build
-          cd build
-          cmake -DBUILD_EXAMPLES=OFF -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DCMAKE_BUILD_TYPE=Release ..
+          mkdir build && cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DCMAKE_BUILD_TYPE=Release .. 
           make -j$(sysctl -n hw.ncpu)
           sudo make install
 
@@ -311,69 +553,123 @@ jobs:
           ./build-native.sh
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: jar-macosx-universal
           path: ./*.jar
 
+  # ============================================
   # Windows x86_64 build
+  # ============================================
   build-windows-x64:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v2
 
       - name: Build raylib
         run: |
           cd raylib
           mkdir build
           cd build
-          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DCMAKE_BUILD_TYPE=Release -A x64 ..
+          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DCMAKE_BUILD_TYPE=Release -A x64 .. 
           msbuild raylib.sln /target:raylib /property:Configuration=Release /property:Platform=x64
-          copy raylib\Release\raylib.lib ..\..
+          copy raylib\Release\raylib.lib . .\.. 
           cd ..\..
         shell: cmd
 
       - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Build jaylib
         env:
           RAYLIB_PLATFORM: windows-x86_64
+        run: |
+          build-windows. bat
+        shell: cmd
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-windows-x64
+          path: ./*.jar
+
+  # ============================================
+  # Windows x86 (32-bit) build
+  # ============================================
+  build-windows-x86:
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build raylib
+        run: |
+          cd raylib
+          mkdir build
+          cd build
+          cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DCMAKE_BUILD_TYPE=Release -A Win32 ..
+          msbuild raylib.sln /target:raylib /property:Configuration=Release /property:Platform=Win32
+          copy raylib\Release\raylib.lib ..\..
+          cd . .\..
+        shell: cmd
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - name: Build jaylib
+        env:
+          RAYLIB_PLATFORM: windows-x86
         run: |
           build-windows.bat
         shell: cmd
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
-          name: jar-windows-x64
+          name: jar-windows-x86
           path: ./*.jar
 
+  # ============================================
   # Windows ARM64 build
+  # ============================================
   build-windows-arm64:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v2
 
       - name: Build raylib
         run: |
@@ -383,10 +679,13 @@ jobs:
           cmake -DBUILD_EXAMPLES=OFF -DCUSTOMIZE_BUILD=ON -DSUPPORT_FILEFORMAT_JPG=ON -DSUPPORT_FILEFORMAT_FLAC=ON -DWITH_PIC=ON -DCMAKE_BUILD_TYPE=Release -A ARM64 ..
           msbuild raylib.sln /target:raylib /property:Configuration=Release /property:Platform=ARM64
           copy raylib\Release\raylib.lib ..\..
-          cd ..\..
+          cd . .\..
         shell: cmd
 
       - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: arm64
+
       - name: Build jaylib
         env:
           RAYLIB_PLATFORM: windows-arm64
@@ -395,31 +694,49 @@ jobs:
         shell: cmd
 
       - name: Upload jar
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: jar-windows-arm64
-          path: ./*.jar
+          path: . /*.jar
 
+  # ============================================
   # Combine all artifacts
+  # ============================================
   combine-artifacts:
-    needs: [build-linux-x64-x11, build-linux-x64-wayland, build-linux-x64-drm, 
-            build-linux-arm64-x11, build-linux-arm64-wayland, build-linux-arm64-drm,
-            build-mac-universal, build-windows-x64, build-windows-arm64]
+    needs: 
+      - build-linux-x64-x11
+      - build-linux-x64-wayland
+      - build-linux-x64-drm
+      - build-linux-x86-x11
+      - build-linux-arm64-x11
+      - build-linux-arm64-wayland
+      - build-linux-arm64-drm
+      - build-linux-armhf-x11
+      - build-linux-armhf-drm
+      - build-mac-x86_64
+      - build-mac-arm64
+      - build-mac-universal
+      - build-windows-x64
+      - build-windows-x86
+      - build-windows-arm64
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
       - name: Display structure
-        run: ls -R
+        run: ls -R artifacts
 
       - name: Combine JARs
         run: |
           mkdir -p combined
-          find . -name "*.jar" -exec cp {} combined/ \;
+          find artifacts -name "*. jar" -exec cp {} combined/ \;
+          ls -la combined/
 
       - name: Upload combined artifacts
-        uses: actions/upload-artifact@v3.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: all-platform-jars
-          path: combined/*.jar
+          path: combined/*. jar
